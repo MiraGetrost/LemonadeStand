@@ -12,8 +12,11 @@ class LemonadePitcher {
 	}
 	
 	isPitcherEmpty(){
-		if(this.glassesPerPitcher==0){
+		
+		console.log(this.glassesRemainingInPitcher);
+		if(this.glassesRemainingInPitcher<=0){
 			return true;
+
 		}
 		return false;
 	}
@@ -99,6 +102,7 @@ class Seller {
 		
 		pitcher.pitcherEmpty = pitcher.isPitcherEmpty();
 		if(pitcher.pitcherEmpty == false){
+			console.log(pitcher.glassesPerPitcher);
 			pitcher.glassesRemainingInPitcher--;
 		}
 		else{
