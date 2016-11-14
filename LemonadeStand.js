@@ -1,3 +1,42 @@
+class GUI{
+
+}
+class User extends GUI {
+	constructor(obj) {
+		super();
+		var seller = $('<img src="images/Person1.gif"/>').addClass('seller');
+		var stage = $("#stage").append(seller);
+	}
+}
+class Today extends GUI {
+	constructor(day,player) {
+		super();
+		//later we can access day.weather to change class / background image based on the weather
+		$("body").addClass("sunnyDay"); //this has background scene in it.
+		this.day = day;
+		this.player = player;
+		this.displayWeather();
+		this.displayDashboard();
+	}
+	displayWeather(){
+		var temp = $('<div></div>').addClass('temperature').attr( "id", "temp" ).html(this.day.temp + "&deg; F");
+		var stage = $("#stage").append(temp);
+		temp.fadeOut(5000,"linear",this.weatherDashboard.bind(this,this.day));
+	}
+	displayDashboard(){
+		var money = $('<div></div>').addClass('money').attr( "id", "money" ).html(this.player.formatCash());
+		var dashboard = $('<div></div>').addClass('dashboard').attr( "id", "dashboard" );
+		
+		dashboard.append(money);
+		var stage = $("#stage").append(dashboard);
+
+	}
+	weatherDashboard(day){
+		var temp = $('<div></div>').addClass('money').attr( "id", "dashTemperature" ).html(day.temp + "&deg; F");
+		$('#dashboard').append(temp);
+		
+	}
+}
 class LemonadePitcher { 
 	constructor() {
 		this.lemons = new Lemons();
@@ -228,10 +267,18 @@ class Seller {
 //main code
 
 function main(){
-	var worldPopulation = 1000;
-	//create seller
-	var user = new Seller();
+	
+	//create day
 	var day = new Day();
+	
+	//create seller (game player)
+	var user = new Seller();
+	
+	//create a gui
+	var guiDay = new Today(day, user);
+	var guiSeller = new User(user);
+	
+	/*
 	console.log(day.temp);
 	console.log(user.formatCash());
 	console.log("Today it is " + day.temp + " degrees farenheit.");
@@ -246,7 +293,10 @@ function main(){
 	//instead of world pop, make that a max, and then use a tick for the day. Num of ticks?
 	//open business
 	user.openBusinessForDay(day);
-	
+	*/
 }
 
-main(); //this runs our code
+$( document ).ready(function() {
+
+	main(); //this runs our code
+});
