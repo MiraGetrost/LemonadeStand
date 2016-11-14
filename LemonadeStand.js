@@ -41,6 +41,7 @@ class Actor {
 	constructor (day) {
 		this.thirst = Math.random(); //This will return a number between 0 and up to (but not including) 1
 		this.willPurchase = this.isPurchasingToday(day);
+		console.log("created new actor. will purchase = " + this.willPurchase);
 	} 
 	isPurchasingToday(day){
 		var purchasingChance = this.thirst * day.temp;
@@ -51,18 +52,31 @@ class Actor {
 	}
 }
 
-class Day {
+class World{
+	constructor(){
+		this.residents = 400;
+		
+
+	}
+
+}
+class Day extends World {
 	constructor() {
+		super();
 		this.minTemp = 50;
 		this.maxTemp = 100;
 		this.temp = this.pickTemperature();
-		
+		this.potentialCustomers = this.residents * (this.temp/100);
+		this.hoursPassed = 0;
 	}
 
 	pickTemperature(){
 		return Math.floor(Math.random() * (this.maxTemp - this.minTemp + 1))+ this.minTemp;
 		
 	}
+
+	
+
 } 
 
 class Seller {
@@ -70,6 +84,10 @@ class Seller {
 		const cashOnStart = 100;
 		this.cash = cashOnStart;
 		this.pitchers = []; //holds pitchers purchased for the day
+		this.todaysBusiness;
+		//create customers array
+		this.actor;
+
 	}
 	buyPitcher() { 
 	
@@ -112,6 +130,7 @@ class Seller {
 			pitcher = this.changeOutPitchers();
 			if(this.noMorePitchers(pitcher) == true){
 				//user is out of pitchers
+				this.closeBusinessForDay();
 				return {};
 			}
 			return pitcher;
@@ -123,7 +142,8 @@ class Seller {
 		if(this.pitchers.length > 0){
 			return this.pitchers[this.pitchers.length - 1]; //returns the last pitcher object
 		}
-		//otherwise return empty object
+		//otherwise close shop and return empty object
+		this.closeBusinessForDay();
 		return {};
 	}
 	noMorePitchers(pitcher){
@@ -142,11 +162,10 @@ class Seller {
 			return false;
 		}
 	}
-	actorsPurchaseLemonade(actors, lemonadeObj){
-		actors.forEach(item => this.sellLemonade(item, lemonadeObj));
-	} 
 	sellLemonade(actor, lemonadeObj){
+		console.log("in sell lemonade. actor = " + actor);
 		if (actor.willPurchase == true){
+			console.log("customer is good to purchase.");
 			//pick up the last pitcher
 			var pitcher = this.changeOutPitchers();
 			//check to see if there's lemonade left
@@ -172,6 +191,35 @@ class Seller {
 			console.log("Someone bought a glass of lemonade from you for $" + pitcher.price + ". Congratulations!");
 			return true;
 		}
+		console.log("customer is not good to purchase");
+	}
+
+	openBusinessForDay(day){
+		console.log("Business is open for the day.");
+		this.todaysBusiness =  setInterval(this.runBusiness.bind(this,day),1000);
+		
+}
+	
+	runBusiness(day){
+			console.log("Hour " + Math.ceil(day.hoursPassed++/3)); // 3 ticks per hour
+			
+			//get total customers for day and divide by 24 for the tick.  Loop through those here.
+			for(var i = 0; i < (day.potentialCustomers / 24);i++){
+				this.actor = new Actor(day);
+				var pitchersRemain = this.sellLemonade(this.actor,this.pitchers); // not the best given we have multiple lemonadePitcher objs, but we need to rediagram these objects anyway.
+				if(pitchersRemain == false || day.hoursPassed >=23){
+					this.closeBusinessForDay(); //no more pitchers. close shop.
+					break;
+				}
+			}
+	
+	}
+
+	closeBusinessForDay(){
+		//stop the timeinterval and tell seller she ran out of pitchers
+		clearInterval(this.todaysBusiness);
+		console.log("Business is closed for the day.");
+		console.log("At the end of the day, you have " + this.formatCash() + ".");
 	}
 
 }
@@ -180,15 +228,11 @@ class Seller {
 //main code
 
 function main(){
-	const worldPopulation = 100
+	var worldPopulation = 1000;
 	//create seller
 	var user = new Seller();
-	console.log(user.cash);
 	var day = new Day();
 	console.log(day.temp);
-	var george = new Actor(day);
-	console.log(george.willPurchase);
-	user.buyPitcher();
 	console.log(user.formatCash());
 	console.log("Today it is " + day.temp + " degrees farenheit.");
 	var numberOfPitchers = prompt("How many pitchers would you like to buy?");
@@ -198,16 +242,11 @@ function main(){
 	}
 	
 	console.log(user.formatCash());
-	//create actors
-	var actors = [];
-	for(var counter = 0; counter < worldPopulation; counter++){
-		actors[counter] = new Actor(day);
-		var pitchersRemain = user.sellLemonade(actors[counter],user.pitchers); // not the best given we have multiple lemonadePitcher objs, but we need to rediagram these objects anyway.
-		if(pitchersRemain == false){
-			break; //no more pitchers. close shop.
-		}
-	}
-	console.log("At the end of the day, you have " + user.formatCash() + ".");
+
+	//instead of world pop, make that a max, and then use a tick for the day. Num of ticks?
+	//open business
+	user.openBusinessForDay(day);
+	
 }
 
 main(); //this runs our code
