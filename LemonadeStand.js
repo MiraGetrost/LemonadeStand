@@ -4,7 +4,7 @@ class GUI{
 class User extends GUI {
 	constructor(obj) {
 		super();
-		var seller = $('<img src="images/Person1.gif"/>').addClass('seller');
+		var seller = $('<img src="images/PersonStanding.sprite2"/>').addClass('seller');
 		var stage = $("#stage").append(seller);
 	}
 }
